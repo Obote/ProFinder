@@ -11,7 +11,7 @@ async function getUser(name){
 
 async function getRepos(profile){
     const res = await fetch(`${profile.repos_url}?
-    client_id=${CLIENT_ID}&client_secret=${cLIENT_SECRET}&per_page=10`);
+    client_id=${CLIENT_ID}&client_secret=${cLIENT_SECRET}&per_page=5`);
 
     const repo = await res.json();
     return repo;
@@ -22,13 +22,30 @@ document.querySelector('#search').addEventListener('submit', async (e) => {
 
     const username = document.querySelector('#findByUsername').value;
 
-    const profile = await getUser(username);
-    const repos = await getRepos(profile);
+    if(username.length > 0){
 
-    showProfile(profile);
-    showRepos(repos);
-    console.log(profile);
-    console.log(repos);
+      document.querySelector('.loader').style.display = 'block';
+      document.querySelector('.user-details').style.display = 'none';
+      document.querySelector('.notFound').style.display = 'none';
+      const profile = await getUser(username);
+      document.querySelector('.loader').style.display = 'none';
+ 
+      if(profile.message === 'Not Found'){
+
+        document.querySelector('.notFound').style.display = 'block';
+
+      }else{
+        const repos = await getRepos(profile);
+
+        document.querySelector('.user-details').style.display = 'flex';
+  
+        showProfile(profile);
+        showRepos(repos); 
+      }
+      
+    }
+
+   
 }); 
 
 function showRepos(repos){
