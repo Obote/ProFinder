@@ -4,8 +4,17 @@ const cLIENT_SECRET = 'f66bddced9966669cfd45759dea138d8c3f03acc';
 async function getUser(name){
     const res = await fetch(`https://api.github.com/users/${name}?
     client_id=${CLIENT_ID}&client_secret=${cLIENT_SECRET}`);
+
     const profile = await res.json();
     return profile;
+}
+
+async function getRepos(profile){
+    const res = await fetch(`${profile.repos_url}?
+    client_id=${CLIENT_ID}&client_secret=${cLIENT_SECRET}&per_page=10`);
+
+    const repo = await res.json();
+    return repo;
 }
 
 document.querySelector('#search').addEventListener('submit', async (e) => {
@@ -14,10 +23,34 @@ document.querySelector('#search').addEventListener('submit', async (e) => {
     const username = document.querySelector('#findByUsername').value;
 
     const profile = await getUser(username);
+    const repos = await getRepos(profile);
 
     showProfile(profile);
+    showRepos(repos);
     console.log(profile);
+    console.log(repos);
 }); 
+
+function showRepos(repos){
+
+    let newHTML1 = '';
+
+    for (let repo of repos){
+        newHTML1 += `
+        <div class="repo">
+              <div class="repo_name">
+                <a href="${repo.html_url}">${repo.name}</a>
+              </div>
+              <p>
+                <span class="circle"></span>${repo.language}
+                <ion-icon name="star-outline"></ion-icon>${repo.watcher_count}
+                <ion-icon name="git-branch-outline"></ion-icon>${repo.forks_count}
+              </p>
+            </div>`;
+    }
+
+    document.querySelector('.repos').innerHTML = newHTML1;
+}
 
 function showProfile(profile){
     document.querySelector('.profile').innerHTML = ` 
